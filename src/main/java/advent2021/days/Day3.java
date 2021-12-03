@@ -1,13 +1,11 @@
 package advent2021.days;
 
 import lombok.SneakyThrows;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,23 +15,21 @@ public class Day3 {
 
     @SneakyThrows
     public int getPowerConsumption(String filename) {
-        var file = new File("src/test/resources/day3/" + filename);
-        var bufferedReader = new BufferedReader(new FileReader(file));
-        bufferedReader.mark(1);
-        var input = bufferedReader.readLine();
-        var binaryArr = new int[input.length()];
+        var list = getInputList(filename);
+        var numLength = list.get(0).length();
+        var binaryArr = new int[numLength];
 
-        bufferedReader.reset();
-        while((input = bufferedReader.readLine()) != null) {
-            var inputArr = input.split("");
-            for (int i = 0; i < inputArr.length; i++){
-                if (inputArr[i].equals("1")) {
-                    binaryArr[i] = binaryArr[i] + 1;
-                } else {
-                    binaryArr[i] = binaryArr[i] - 1;
-                }
-            }
-        }
+       for (int i = 0; i < list.size(); i++){
+           for (int j = 0; j < numLength; j++) {
+               var currentBit = list.get(i).charAt(j);
+               if (currentBit == '0') {
+                   binaryArr[j] = binaryArr[j] - 1;
+               } else {
+                   binaryArr[j] = binaryArr[j] + 1;
+               }
+           }
+       }
+
         var gammaRate = new StringBuilder();
         var epsilonRate = new StringBuilder();
         for (int i = 0; i < binaryArr.length; i++) {
@@ -46,41 +42,36 @@ public class Day3 {
             }
         }
 
-
         return parseInt(gammaRate.toString(), 2) * parseInt(epsilonRate.toString(), 2);
     }
 
     @SneakyThrows
     public int getLifeSupportRating(String filename) {
         var oxygenList = getInputList(filename);
-        var c02List = getInputList(filename);
+        var c02List = new ArrayList<>(oxygenList);
 
-        var oxygen = getOxygenGeneratorRating(oxygenList);
-        var c02 = getC02ScrubberRating(c02List);
+        var oxygen = getRating(oxygenList, "max");
+        var c02 = getRating(c02List, "min");
 
 
         return parseInt(oxygen, 2) * parseInt(c02, 2);
     }
 
-    private String getOxygenGeneratorRating(List<String> list) throws IOException {
+    private String getRating(List<String> list, String ratingType) {
         var numLength = list.get(0).length();
         for (int i = 0; i < numLength; i++) {
             var zeroes = new ArrayList<String>();
             var ones = new ArrayList<String>();
-            for (int j = 0; j < list.size(); j++) {
-                var currentNumber = list.get(j);
-                if (list.get(j).charAt(i) == '0') {
-                    zeroes.add(currentNumber);
-                } else {
-                    ones.add(currentNumber);
-                }
+            populateZeroesAndOnesLists(list, i, zeroes, ones);
+
+            if (ratingType.equals("max")) {
+                removeMinValues(list, zeroes, ones);
             }
 
-            if (zeroes.size() > ones.size()) {
-                list.removeAll(ones);
-            } else {
-                list.removeAll(zeroes);
+            if (ratingType.equals("min")) {
+                removeMaxValues(list, zeroes, ones);
             }
+
             if (list.size() == 1) {
                 break;
             }
@@ -88,30 +79,15 @@ public class Day3 {
         return list.get(0);
     }
 
-    private String getC02ScrubberRating(List<String> list) throws IOException {
-        var numLength = list.get(0).length();
-        for (int i = 0; i < numLength; i++) {
-            var zeroes = new ArrayList<String>();
-            var ones = new ArrayList<String>();
-            for (int j = 0; j < list.size(); j++) {
-                var currentNumber = list.get(j);
-                if (list.get(j).charAt(i) == '0') {
-                    zeroes.add(currentNumber);
-                } else {
-                    ones.add(currentNumber);
-                }
-            }
-
-            if (zeroes.size() > ones.size()) {
-                list.removeAll(zeroes);
+    private void populateZeroesAndOnesLists(List<String> list, int i, ArrayList<String> zeroes, ArrayList<String> ones) {
+        for (int j = 0; j < list.size(); j++) {
+            var currentNumber = list.get(j);
+            if (list.get(j).charAt(i) == '0') {
+                zeroes.add(currentNumber);
             } else {
-                list.removeAll(ones);
-            }
-            if (list.size() == 1) {
-                break;
+                ones.add(currentNumber);
             }
         }
-        return list.get(0);
     }
 
     private List<String> getInputList(String filename) throws IOException {
@@ -123,6 +99,22 @@ public class Day3 {
             list.add(input);
         }
         return list;
+    }
+
+    private void removeMaxValues(List<String> list, ArrayList<String> zeroes, ArrayList<String> ones) {
+        if (zeroes.size() > ones.size()) {
+            list.removeAll(zeroes);
+        } else {
+            list.removeAll(ones);
+        }
+    }
+
+    private void removeMinValues(List<String> list, ArrayList<String> zeroes, ArrayList<String> ones) {
+        if (zeroes.size() > ones.size()) {
+            list.removeAll(ones);
+        } else {
+            list.removeAll(zeroes);
+        }
     }
 
 }
