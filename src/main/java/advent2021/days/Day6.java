@@ -5,29 +5,30 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class Day6 {
 
     @SneakyThrows
-    public int getLaternfishCount(String filename, int days) {
+    public long getLaternfishCount(String filename, int days) {
         var file = new File("src/test/resources/day6/" + filename);
         var fishList = Arrays.stream(Files.readString(file.toPath()).split(",")).map(Integer::parseInt).collect(toList());
 
-        for (int i = 0; i < days; i++){
-            int fishCount = fishList.size();
-            for (int j = 0; j < fishCount; j++) {
-                int fish = fishList.get(j);
-                if (fish == 0) {
-                    fishList.set(j, 6);
-                    fishList.add(8);
-                } else {
-                    fishList.set(j, fish - 1);
-                }
-            }
+        var counts = new long[9];
+        for (int fish : fishList) {
+            counts[fish]++;
         }
-        return fishList.size();
+
+        for (int i = 0; i < days; i++){
+            long zeroCount = counts[0];
+
+            for (int j = 0; j < counts.length - 1; j++) {
+                counts[j] = counts[j + 1];
+            }
+            counts[6] += zeroCount;
+            counts[8] = zeroCount;
+        }
+        return Arrays.stream(counts).sum();
     }
 }

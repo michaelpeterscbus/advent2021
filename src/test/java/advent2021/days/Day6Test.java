@@ -26,12 +26,12 @@ class Day6Test {
     void getLanternfishCountForTestInput_256Days() {
         var result = subject.getLaternfishCount("testInput.txt", 256);
 
-        System.out.println(result);
+        assertThat(result).isEqualTo(26984457539L);
     }
 
     @Test
     void getLanternfishCount_answer() {
-        var result = subject.getLaternfishCount("input.txt", 80);
+        var result = subject.getLaternfishCount("input.txt", 256);
 
         System.out.println(result);
     }
